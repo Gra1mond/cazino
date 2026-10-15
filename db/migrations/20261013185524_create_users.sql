@@ -1,0 +1,37 @@
+-- +goose Up
+CREATE TABLE users(
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name TEXT NOT NULL
+);
+CREATE TABLE tables(
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    name TEXT NOT NULL
+);
+CREATE TABLE rounds(
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    winning_number INTEGER CHECK(winning_number BETWEEN 0 AND 36),
+    winning_at TIMESTAMP NOT NULL,
+    table_id BIGINT NOT NULL REFERENCES tables(id)
+);
+CREATE TABLE bets(
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    bet_type BIGINT NOT NULL,
+    bet_value BIGINT NOT NULL,
+    amount BIGINT NOT NULL CHECK(amount > 0),
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    round_id BIGINT NOT NULL REFERENCES rounds(id)
+);
+CREATE TABLE transactions(
+    id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    user_id BIGINT NOT NULL REFERENCES users(id),
+    amount_change BIGINT,
+    created_at TIMESTAMPTZ NOT NULL DEFAULT now(),
+    bet_id BIGINT NOT NULL REFERENCES bets(id)
+);
+
+-- +goose Down
+DROP TABLE transactions;
+DROP TABLE bets;
+DROP TABLE rounds;
+DROP TABLE tables;
+DROP TABLE users;
